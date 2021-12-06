@@ -1,6 +1,6 @@
 <template>
-  <div class="goods-item">
-    <img :src="goodsItem.show.img" alt="">
+  <div class="goods-item" @click="itemClick">
+    <img :src="showImage" alt="" @load="imageLoad">
     <div class="goods-info">
       <p>{{goodsItem.title}}</p>
       <span class="price">{{goodsItem.price}}</span>
@@ -18,6 +18,24 @@ export default {
       default() {
         return {}
       }
+    }
+  },
+  computed: {
+    showImage() {
+      //return a||b的意思就是如果a是true则返回a(此时不再看b),否则返回b
+      // return a&&b的意思就是如果a是false就则返回a，否则返回b
+      // 在首页this.goodsItem.show.img数据是先展示的
+      return this.goodsItem.image || this.goodsItem.show.img
+    }
+  },
+  methods: {
+    imageLoad() {
+      this.$bus.$emit('itemImageLoad')
+    },
+    itemClick() {
+      // console.log('跳转到详情页');
+      this.$router.push('/detail/' + this.goodsItem.iid)
+
     }
   }
 }
