@@ -3,9 +3,9 @@
     <detail-nav-bar class="detail-nav" @titleClick="titleClick" ref="nav"/>
     <scroll class="content" ref="scroll" @scroll="contentScroll" :probe-type="3">
 <!--      属性：topImages 传入值：top-images-->
-      <ul>
-        <li v-for="item in $store.state.cartList">{{item}}</li>
-      </ul>
+<!--      <ul>-->
+<!--        <li v-for="item in $store.state.cartList">{{item}}</li>-->
+<!--      </ul>-->
       <detail-swiper :top-images="topImages"/>
       <detail-base-info :goods="goods"/>
       <detail-shop-info :shop="shop"/>
@@ -16,6 +16,7 @@
     </scroll>
     <detail-bottom-bar @addToCart="addToCart"/>
     <back-top @click.native="backClick" v-show="isShowBackTop"/>
+<!--    <toast :message="message" :show="show"/>-->
   </div>
 </template>
 
@@ -32,10 +33,13 @@
   import Scroll from "components/common/scroll/Scroll";
   import GoodsList from "components/content/goods/GoodsList";
   import BackTop from "components/content/backTop/BackTop";
+  import Toast from "components/common/toast/Toast";
 
   import {getDetail,  getRecommend, Goods, Shop, GoodsParam} from "network/detail";
   import {debounce} from "common/utils";
   import {itemListenerMixin, backTopMixin} from "common/mixin";
+
+  import { mapActions } from "vuex"
 
   export default {
     name: "Detail",
@@ -49,6 +53,8 @@
       DetailCommentInfo,
       GoodsList,
       DetailBottomBar,
+      BackTop,
+      // Toast,
 
       Scroll,
     },
@@ -136,6 +142,7 @@
       this.$bus.$off('itemImageLoad', this.itemImgListener)
     },
     methods: {
+      ...mapActions(['addCart']),
       imageLoad() {
         this.$refs.scroll.refresh()
 
@@ -187,15 +194,34 @@
       addToCart() {
         // console.log('添加到购物车');
         // 1.获取购物车需要展示的信息
+        // console.log(this)
         const product = {};
         product.iid = this.iid
         product.image = this.topImages[0];
         product.title = this.goods.title;
         product.desc = this.goods.desc;
-        product.newPrice = this.goods.nowPrice;
+        product.price = this.goods.nowPrice;
 
-        // 2.将商品添加到购物车里
-        this.$store.commit('addCart', product)
+        // 2.将商品添加到购物车里(1.Promise 2.mapActions)
+        // this.$store.commit('addCart', product)
+
+        this.addCart(product).then(res => {
+          // console.log(res);
+          // this.show = true;
+          // this.message = res;
+          // setTimeout(() => {
+          //   this.show = false;
+          //   this.message = ''
+          // }, 1500)
+
+          console.log(this.$toast);
+          this.$toast.show(res, 2000)
+        })
+
+        // this.$store.dispatch('addCart', product).then(res => {
+        //   console.log(res);
+
+        // })
       }
 
     }
